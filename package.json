@@ -1,0 +1,9 @@
+{
+    "name": "catsagram",
+    "version": "1.0.0",
+    "description": "You can like and comment on cat pics",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "author":"Shevon Williams <williams.shevon@gmail.com>"
+  }
