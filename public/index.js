@@ -55,17 +55,22 @@ window.addEventListener("DOMContentLoaded", async () => {
         let commentsArr = [];
         let url = "";
 
-if(restoreUrl()===""){
+
         //request a random cat image from the cat API
         const res = await fetch ("https://api.thecatapi.com/v1/images/search");
         const data = await res.json();
         url = data[0].url;
-}
+
 
 //restore saved data
-        url = restoreUrl();
+        if(restoreUrl()===""){
+                url = data[0].url;
+        }
+        else url = restoreUrl();
         popScore = restorepopScore();
         commentsArr = restoreCommentsArr();
+
+        storeUrl(url);
 
 //add div block for cat image on html page
         const newdiv = document.createElement("div");
