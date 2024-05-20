@@ -1,15 +1,71 @@
 // Your code here
+//storing the page state
+function storeUrl (url){
+        localStorage.setItem("url", url);
+}
+
+function storePopScore (popScore){
+        localStorage.setItem("popScore", popScore);
+}
+
+function storeComments (commentsArr){
+        localStorage.setItem("comments", JSON.stringify(commentsArr));
+}
+
+//functions to restore page state
+        function restoreUrl(){
+                var storedUrl = localStorage.getItem("url");
+                if(storedUrl){
+                return storedUrl;
+                }
+                else {
+                return "";
+                }
+        }
+
+        function restorepopScore(){
+                var StoredpopScore = localStorage.getItem("popScore");
+                if(StoredpopScore){
+                return Number(StoredpopScore);
+                }
+                else {
+                return 0;
+                }
+        }
+
+        function restoreCommentsArr(){
+                var storedComments = localStorage.getItem("comments");
+                if(storedComments){
+                return JSON.parse(storedComments);
+                }
+                else {
+                return [];
+                }
+        }
+
 //add event listener to inject code on page load
 window.addEventListener("DOMContentLoaded", async () => {
-    const h2Element = document.createElement("h2");
-    h2Element.innerText = "Catsagram";
-    document.body.appendChild(h2Element);
+        const h2Element = document.createElement("h2");
+        h2Element.innerText = "Catsagram";
+        document.body.appendChild(h2Element);
 
     try{
-//request a random cat image from the cat API
+//variables
+        let popScore = 0;
+        let commentsArr = [];
+        let url = "";
+
+if(restoreUrl()===""){
+        //request a random cat image from the cat API
         const res = await fetch ("https://api.thecatapi.com/v1/images/search");
         const data = await res.json();
-        const url = data[0].url;
+        url = data[0].url;
+}
+
+//restore saved data
+        url = restoreUrl();
+        popScore = restorepopScore();
+        commentsArr = restoreCommentsArr();
 
 //add div block for cat image on html page
         const newdiv = document.createElement("div");
@@ -24,8 +80,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         document.body.append(newbtn);
 
 //add a popularity score section
-        let popScore = 0;
-
         const newdiv2 = document.createElement("div");
         newdiv2.id = "popularity";
         newdiv2.innerText = `Popularity Score: ${popScore}`;
@@ -63,6 +117,8 @@ const updateScore = (popScore)=>{
         thumbsUpButton.addEventListener("click", () => {
                 popScore+=1;
                 updateScore(popScore);
+        //store popScore
+                storePopScore(popScore);
         });
 
         const thumbsDownButton = document.getElementById("thumbsdown");
@@ -71,6 +127,8 @@ const updateScore = (popScore)=>{
                         popScore-=1;
                 }
                 updateScore(popScore);
+        //store popScore
+                storePopScore(popScore);
         });
 
 //add a box to add a new comment under the pic
@@ -82,13 +140,17 @@ const updateScore = (popScore)=>{
         document.body.appendChild(newdiv4);
 
 //add event listener for when a new comment is submitted
-        let commentsArr = [];
+
         const submitBtn = document.getElementById("addCommentBtn");
         submitBtn.addEventListener("click", ()=>{
         const commentBox = document.getElementById("commentBox");
                 if (commentBox.value!==""){
                         const commentBox = document.getElementById("commentBox");
                         commentsArr.push(commentBox.value);
+
+                        //store comments
+                        storeComments(commentsArr);
+
                         commentsCounterUpdate();
                         if(commentsArr.length>1&&document.getElementById("listOfComments")){
                                 const temp4 = document.getElementById("listOfComments");
@@ -152,10 +214,8 @@ const updateScore = (popScore)=>{
                                 const commentid = (delbtn.id);
                                 const commentNum = Number(commentid[commentid.length-1]);
 
-
-                                console.log(commentsArr);
                                 commentsArr.splice(commentNum-1, 1);
-                                console.log(commentsArr);
+                                storeComments(commentsArr);
 
                                 const delComment = document.getElementsByClassName(`comment${commentNum}`)[0];
                                 const parent = document.getElementById("listOfComments");
@@ -192,7 +252,11 @@ const updateScore = (popScore)=>{
         //request a random cat image from the cat API
                 const res = await fetch ("https://api.thecatapi.com/v1/images/search");
                 const data = await res.json();
-                const url = data[0].url;
+                url = data[0].url;
+
+                //store url
+                storeUrl(url);
+
 
         //add div block for cat image on html page
                 const imgdiv = document.getElementById("img");
@@ -201,13 +265,22 @@ const updateScore = (popScore)=>{
         //reset popularity scores
                 popScore = 0;
                 updateScore(popScore);
+                //store score
+                storePopScore(popScore);
 
         //reset comments
                 commentsArr=[];
+
+                //store comments
+                storeComments(commentsArr);
+
                 commentsCounterUpdate();
-                delElem = document.getElementById("listOfComments");
-                document.body.removeChild(delElem);
+                if(document.getElementById("listOfComments")){
+                        delElem = document.getElementById("listOfComments");
+                        document.body.removeChild(delElem);
+                }
         });
+
 
     } catch (e) {
         console.log("couldn't fetch cat pic ^>.<^");
